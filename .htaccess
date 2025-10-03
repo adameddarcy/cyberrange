@@ -1,0 +1,34 @@
+# W Corp Cyber Range - Apache Configuration
+# This file intentionally exposes sensitive information
+
+# VULNERABILITY: A05 - Security Misconfiguration
+# Expose directory structure and configuration
+
+Options +Indexes
+IndexOptions FancyIndexing
+
+# Allow access to sensitive files
+<Files "*.env">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "*.sql">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<Files "*.log">
+    Order allow,deny
+    Allow from all
+</Files>
+
+# Disable security headers
+Header unset X-Frame-Options
+Header unset X-Content-Type-Options
+Header unset X-XSS-Protection
+Header unset Strict-Transport-Security
+
+# Expose server information
+ServerTokens Full
+ServerSignature On

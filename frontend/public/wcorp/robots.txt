@@ -1,0 +1,29 @@
+# W Corp Employee Portal - Robots.txt
+# This file provides guidance for web crawlers
+
+User-agent: *
+Allow: /
+
+# Employee portal access
+Allow: /wcorp/
+Allow: /wcorp/login.html
+Allow: /wcorp/register.html
+Allow: /wcorp/portal.html
+
+# Administrative access
+Disallow: /wcorp/admin.html
+Disallow: /wcorp/profile.html
+
+# Internal directories
+Disallow: /uploads/
+Disallow: /api/
+Disallow: /config/
+Disallow: /backup/
+
+# Legacy system
+Disallow: /php/
+Disallow: /legacy/
+
+# Sitemap location
+Sitemap: http://localhost:3000/wcorp/sitemap.xml
+

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # Node.js service for core backend and React frontend
+  web:
+    build: 
+      context: ..
+      dockerfile: Dockerfile.node
+    ports:
+      - "127.0.0.1:3000:3000"  # Bind only to localhost for security
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=db
+      - DB_USER=wcorp_user
+      - DB_PASSWORD=${DB_PASSWORD:-wcorp_pass_CHANGE_ME}
+      - DB_NAME=wcorp_db
+      - JWT_SECRET=${JWT_SECRET:-CHANGE_THIS_SECRET_KEY_IN_PRODUCTION}
+    depends_on:
+      - db
+    volumes:
+      - ../backend:/app/backend
+      - ../frontend:/app/frontend
+      - ../uploads:/app/uploads
+    networks:
+      - wcorp-network
+    restart: unless-stopped
+
+  # MySQL database
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root_password_CHANGE_ME}
+      - MYSQL_DATABASE=wcorp_db
+      - MYSQL_USER=wcorp_user
+      - MYSQL_PASSWORD=${DB_PASSWORD:-wcorp_pass_CHANGE_ME}
+    ports:
+      - "127.0.0.1:3306:3306"  # Bind only to localhost for security
+    volumes:
+      - ../database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+    networks:
+      - wcorp-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  wcorp-network:
+    driver: bridge
+    # Note: Remove 'internal: true' if you need external access via reverse proxy

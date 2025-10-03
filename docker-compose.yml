@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # Node.js service for core backend and React frontend
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile.node
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=db
+      - DB_USER=wcorp_user
+      - DB_PASSWORD=wcorp_pass
+      - DB_NAME=wcorp_db
+      - JWT_SECRET=predictable_secret_key_123
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+      - ./uploads:/app/uploads
+    networks:
+      - wcorp-network
+
+
+  # MySQL database
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=wcorp_db
+      - MYSQL_USER=wcorp_user
+      - MYSQL_PASSWORD=wcorp_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+    networks:
+      - wcorp-network
+
+volumes:
+  mysql_data:
+
+networks:
+  wcorp-network:
+    driver: bridge

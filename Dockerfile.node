@@ -1,0 +1,39 @@
+# Node.js Dockerfile for W Corp Cyber Range
+FROM node:16-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    mysql-client
+
+# Copy package files
+COPY backend/package*.json ./
+COPY frontend/package*.json ./frontend/
+
+# Install backend dependencies
+RUN npm install
+
+# Install frontend dependencies
+WORKDIR /app/frontend
+RUN npm install
+
+# Go back to app root
+WORKDIR /app
+
+# Copy application code
+COPY backend/ ./backend/
+COPY frontend/ ./frontend/
+
+# Create uploads directory
+RUN mkdir -p /app/uploads
+
+# Expose port
+EXPOSE 3000
+
+# Start the application
+CMD ["node", "backend/server.js"]

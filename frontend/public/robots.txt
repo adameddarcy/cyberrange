@@ -1,0 +1,21 @@
+# W Corp Robots.txt - Cyber Range
+# This file intentionally exposes directory structure for reconnaissance
+
+User-agent: *
+Allow: /
+
+# VULNERABILITY: Exposed sensitive directories
+Disallow: /admin/
+Disallow: /api/
+Disallow: /uploads/
+Disallow: /php/
+Disallow: /config/
+Disallow: /backup/
+
+# Internal directories (should be hidden)
+Disallow: /internal/
+Disallow: /logs/
+Disallow: /temp/
+
+# Sitemap location
+Sitemap: http://localhost:3000/sitemap.xml
