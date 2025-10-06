@@ -8,10 +8,11 @@ This directory contains deployment configurations and scripts for securely deplo
 
 ## 📁 Files in this Directory
 
-- `docker-compose.prod.yml` - Production Docker Compose configuration
-- `deploy-digitalocean.sh` - Automated DigitalOcean deployment script
-- `aws-ecs-task-definition.json` - AWS ECS Fargate task definition
-- `deployment-guide.md` - Comprehensive deployment guide (in parent directory)
+- `fresh-digitalocean-install.sh` - Complete automated DigitalOcean deployment
+- `docker-compose.simple.yml` - Simplified production configuration
+- `docker-compose.prod.yml` - Advanced production configuration
+- `docker-compose.fixed.yml` - Configuration with health checks
+- Various troubleshooting and utility scripts
 
 ## 🚀 Quick Start Options
 

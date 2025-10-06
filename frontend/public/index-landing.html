@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W Corp - Cyber Security Training Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            padding: 60px;
+            margin: 20px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 18px;
+        }
+
+        .content {
+            margin-top: 40px;
+        }
+
+        .content h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .content p {
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 5px;
+        }
+
+        .warning-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .warning-box h3::before {
+            content: "⚠️";
+            margin-right: 10px;
+            font-size: 24px;
+        }
+
+        .warning-box p {
+            color: #856404;
+            margin: 0;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px 40px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .feature {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .feature p {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>W Corp</h1>
+            <p>Cyber Security Training Platform</p>
+        </div>
+
+        <div class="content">
+            <h2>Welcome to the Cyber Range</h2>
+            <p>
+                This is an educational platform designed to help security professionals, students, and 
+                enthusiasts learn about web application vulnerabilities and security testing in a safe, 
+                controlled environment.
+            </p>
+
+            <div class="warning-box">
+                <h3>Educational Purpose Only</h3>
+                <p>
+                    This application contains intentional security vulnerabilities for training purposes. 
+                    Never deploy this in production environments or use real personal information.
+                </p>
+            </div>
+
+            <p>
+                The cyber range demonstrates common security vulnerabilities from the OWASP Top 10, 
+                including authentication bypasses, injection attacks, broken access control, and more.
+            </p>
+
+            <div class="features">
+                <div class="feature">
+                    <h3>🎯 OWASP Top 10</h3>
+                    <p>Learn about the most critical web application security risks</p>
+                </div>
+                <div class="feature">
+                    <h3>🔐 Real Scenarios</h3>
+                    <p>Practice on realistic vulnerable applications</p>
+                </div>
+                <div class="feature">
+                    <h3>📚 Safe Environment</h3>
+                    <p>Train without risk in an isolated sandbox</p>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="/wcorp" class="cta-button">Enter Training Environment →</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>W Corp Cyber Range | For Educational and Training Purposes Only</p>
+        </div>
+    </div>
+</body>
+</html>

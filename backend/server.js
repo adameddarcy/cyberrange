@@ -80,15 +80,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from React build
-app.use(express.static(path.join(__dirname, '../frontend/build')));
-
-// Serve vulnerable site at /wcorp/
-app.use('/wcorp', express.static(path.join(__dirname, '../frontend/public/wcorp')));
+// Serve the React app at /wcorp
+app.use('/wcorp', express.static(path.join(__dirname, '../frontend/build')));
 
 // VULNERABILITY: A05 - Security Misconfiguration
 // Expose uploads directory without proper access controls
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -423,9 +420,19 @@ app.get('/api/admin/stats', async (req, res) => {
   }
 });
 
-// Serve React app for all other routes
-app.get('*', (req, res) => {
+// Serve landing page at root
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/public', 'index-landing.html'));
+});
+
+// Serve React app for /wcorp routes
+app.get('/wcorp/*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+});
+
+// 404 for all other routes
+app.get('*', (req, res) => {
+  res.status(404).send('Not Found');
 });
 
 // Start server

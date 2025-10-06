@@ -27,7 +27,7 @@ function ProtectedRoute({ children, adminOnly = false }) {
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router basename="/wcorp">
         <div className="App">
           <Routes>
             <Route path="/" element={<LandingPage />} />

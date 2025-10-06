@@ -29,6 +29,13 @@ WORKDIR /app
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
 
+# Build the React frontend
+WORKDIR /app/frontend
+RUN npm run build
+
+# Go back to app root
+WORKDIR /app
+
 # Create uploads directory
 RUN mkdir -p /app/uploads
 
