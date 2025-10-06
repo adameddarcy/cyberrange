@@ -2,6 +2,7 @@
   "name": "wcorp-frontend",
   "version": "1.0.0",
   "description": "W Corp Frontend - Cyber Range Application",
+  "homepage": "/wcorp",
   "private": true,
   "dependencies": {
     "react": "^18.2.0",

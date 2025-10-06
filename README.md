@@ -15,6 +15,12 @@ The cyber range consists of:
 - **Backend API:** Node.js server with intentional security flaws
 - **Database:** MySQL database with sample vulnerable data
 
+📐 **Detailed Architecture:** See [DECOMPOSITION/](DECOMPOSITION/) folder for:
+- C4 Model diagrams (Context, Container, Component)
+- Data Flow diagrams
+- Message Sequence diagrams
+- Complete system decomposition
+
 ## 🚀 Quick Start
 
 ### Prerequisites
