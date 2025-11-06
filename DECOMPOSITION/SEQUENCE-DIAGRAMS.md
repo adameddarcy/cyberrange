@@ -2,6 +2,8 @@
 
 ## 1. User Registration Sequence
 
+[User Registration Sequence Diagram](./static/User%20Registration%20Sequence.png)
+
 ```mermaid
 sequenceDiagram
     actor User
@@ -54,6 +56,8 @@ sequenceDiagram
 ```
 
 ## 2. Login & Authentication Sequence
+
+[Login and Auth Sequence](./static/Login%20and%20Auth%20Seq.png)
 
 ```mermaid
 sequenceDiagram
@@ -114,6 +118,8 @@ sequenceDiagram
 ```
 
 ## 3. IDOR Attack Sequence
+
+[IDOR Attack Sequence](./static/IDOR%20Seq.png)
 
 ```mermaid
 sequenceDiagram
@@ -183,6 +189,8 @@ sequenceDiagram
 
 ## 4. SQL Injection Attack Sequence
 
+[SQL Injection Attack Sequence](./static/Sql%20Injection%20Seq.png)
+
 ```mermaid
 sequenceDiagram
     actor Attacker
@@ -237,6 +245,8 @@ sequenceDiagram
 ```
 
 ## 5. File Upload & XSS Attack Sequence
+
+[File Upload & XSS Attack Sequence](./static/File%20Upload%20&%20XSS%20Attack%20Sequence.png)
 
 ```mermaid
 sequenceDiagram
@@ -312,6 +322,8 @@ sequenceDiagram
 ```
 
 ## 6. SSRF Attack Sequence
+
+[SSRF Attack Sequence](./static/SSRF%20seq.png)
 
 ```mermaid
 sequenceDiagram

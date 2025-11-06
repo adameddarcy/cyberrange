@@ -4,6 +4,8 @@
 
 This diagram shows the high-level technology containers (applications, data stores) that make up the W Corp Cyber Range system.
 
+[C4 Container](./static/C4%20Container.png)
+
 ```mermaid
 C4Container
     title Container Diagram - W Corp Cyber Range

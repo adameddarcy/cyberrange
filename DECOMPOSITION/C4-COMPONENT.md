@@ -4,6 +4,8 @@
 
 This diagram shows the internal components of the Node.js Backend container.
 
+[C4 Component](./static/C4%20component.png)
+
 ```mermaid
 C4Component
     title Component Diagram - Node.js Backend (Express.js)
